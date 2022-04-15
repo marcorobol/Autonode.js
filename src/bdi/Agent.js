@@ -2,7 +2,7 @@
 /**
  * BDI
  */
-const Beliefset =  require('./beliefset')
+const Beliefset =  require('./Beliefset')
 
 
 class Agent {

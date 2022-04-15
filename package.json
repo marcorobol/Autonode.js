@@ -10,5 +10,9 @@
   "license": "ISC",
   "devDependencies": {
     "jest": "^27.5.1"
+  },
+  "dependencies": {
+    "express": "^4.17.3",
+    "socket.io": "^4.4.1"
   }
 }
