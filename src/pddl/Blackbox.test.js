@@ -1,17 +1,62 @@
 const blackboxGenerator = require('./Blackbox')
 const Agent = require('../bdi/Agent')
-const {LightOn, DimOffLight, DimOnLight} = require('../lightsworld')
+const PlanningGoal =  require('../planning/PlanningGoal')
+const PlanningIntention =  require('../planning/PlanningIntention')
 
 
 
-test('Blackbox.blackboxExec', async () => {
+class LightOn extends PlanningIntention {
 
-    var Blackbox = blackboxGenerator([LightOn])
-    var blackbox = new Blackbox(new Agent('a1'), new LightOn({l: 'light1'}))
-    await blackbox.blackboxExec('./src/pddl/domain-lights.test.pddl', './src/pddl/problem-lights.test.pddl')
-    expect(blackbox.plan.length).toBe(1);
+    static parameters = ['l'];
+    static precondition = [ ['switched-off', 'l'] ];
+    static effect = [ ['switched-on', 'l'], ['not switched-off', 'l'] ];
+    
+    *exec () {
+        let args = this.goal.parameters.args
+        for (let i = 0; i < 3; i++) {
+            this.log(args, i)
+            yield new Promise( res => setTimeout(res, 50))
+        }
+        yield
+    }
 
-    blackbox.agent.intentions.push(DimOnLight)
-    blackbox.run()
+}
+
+
+
+test('Blackbox.blackboxExec()', async () => {
+
+    var a1 = new Agent('a1')
+
+    var BlackboxIntention = blackboxGenerator([LightOn])
+    var i1 = new BlackboxIntention(a1, new PlanningGoal({}))
+
+    await i1.blackboxExec('./src/pddl/domain-lights.test.pddl', './src/pddl/problem-lights.test.pddl')
+    expect(i1.plan.length).toBe(1);
+
+});
+
+test('Blackbox.run()', async () => {
+
+    var a1 = new Agent('a2')
+    a1.beliefs.declare('switched-off l1')
+
+    var BlackboxIntention = blackboxGenerator([LightOn])
+    var i1 = new BlackboxIntention(a1, new PlanningGoal({goal: ['switched-on l1']}))
+
+    expect( await i1.run() ).toBe(true);
+
+});
+
+test('Blackbox agent', async () => {
+
+    var a1 = new Agent('a3')
+    a1.beliefs.declare('switched-off l1')
+    
+    var BlackboxIntention = blackboxGenerator()
+    BlackboxIntention.addAction(LightOn)
+    a1.intentions.push(BlackboxIntention)
+
+    expect( await a1.postSubGoal( new PlanningGoal({goal: ['switched-on l1']}) ) ).toBe(true);
 
 });

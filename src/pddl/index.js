@@ -1,8 +1,8 @@
 
 const { PddlProblem } = desires = require('./PddlProblem')
 const { PddlDomain } = desires = require('./PddlDomain')
-const BlackboxGenerator = desires = require('./Blackbox')
+const blackboxGenerator = desires = require('./Blackbox')
 
 
 
-module.exports = { PddlProblem, PddlDomain, BlackboxGenerator }
+module.exports = { PddlProblem, PddlDomain, blackboxGenerator }

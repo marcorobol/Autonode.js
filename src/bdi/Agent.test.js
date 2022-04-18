@@ -1,44 +1,54 @@
 const Agent = require('./Agent')
-const {LightOn, DimOffLight, DimOnLight} = require('../lightsworld')
+const Intention = require('./Intention');
+const Goal = require('./Goal');
 
 
-test('Agent', () => {
 
+class LightOn extends Goal {
+}
+
+
+
+test('Agent.constructor', () => {
   expect(new Agent('a1').name).toBe('a1');
-
 });
 
 test('Agent.postSubGoal => Succesfully used intention', async () => {
   
-  // jest.setTimeout(10000)
-
-  var agent = new Agent('a1')
-  agent.beliefs.apply('switched-off light0')
+  class DimOnLight extends Intention {
+    static applicable (goal) {
+        return goal instanceof LightOn
+    }
+    *exec () {
+        for (let i = 0; i < 10; i++) {
+            yield new Promise( res => setTimeout(res, 50))
+        }
+    }
+  }
+  var lightOn = new LightOn({light: 'light0'})
+  var agent = new Agent('a2')
   agent.intentions.push(DimOnLight)
-
-  expect(await agent.postSubGoal(new LightOn({l: 'light0'}))).toBe(true);
-
-});
-
-test('Agent.postSubGoal => Goal cannot be taken, preconditions are not valid', async () => {
-  
-  // jest.setTimeout(10000)
-
-  var agent = new Agent('kitchen')
-  agent.beliefs.apply('not switched-off light0')
-  agent.intentions.push(DimOnLight)
-
-  expect(await agent.postSubGoal(new LightOn({l: 'light0'}))).toBe(undefined);
+  expect( await agent.postSubGoal(lightOn) ).toBe(true);
 
 });
 
 test('Agent.postSubGoal => No success in achieving goal', async () => {
-  
-  // jest.setTimeout(10000)
 
-  var agent = new Agent('kitchen')
-  agent.beliefs.apply('switched-off light0')
+  var agent = new Agent('a3')
+  expect( await agent.postSubGoal(new LightOn()) ).toBe(false);
 
-  expect(await agent.postSubGoal(new LightOn({l: 'light0'}))).toBe(undefined);
+});
+
+test('Agent.postSubGoal => Trying to use intention => No success in achieving goal', async () => {
+
+  class DimOnLight extends Intention {
+    *exec () {
+        yield Promise.reject('generic test-plan failure')
+    }
+  }
+
+  var agent = new Agent('a4')
+  agent.intentions.push(DimOnLight)
+  expect( await agent.postSubGoal(new LightOn()) ).toBe(false);
 
 });

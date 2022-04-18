@@ -2,10 +2,11 @@ const Intention = require('../bdi/Intention')
 const PddlDomain = require('./PddlDomain')
 const PddlProblem = require('./PddlProblem')
 const execFile = require('child_process').execFile;
+const PlanningGoal =  require('../planning/PlanningGoal')
 
 
 
-function blackboxGenerator (desires = []) {
+function blackboxGenerator (intentions = []) {
 
     var Blackbox = class extends Intention {
         
@@ -16,8 +17,8 @@ function blackboxGenerator (desires = []) {
 
         static actions = {}
 
-        static addAction (desireClass) {
-            this.actions[desireClass.name.toLowerCase()] = desireClass
+        static addAction (intentionClass) {
+            this.actions[intentionClass.name.toLowerCase()] = intentionClass
         }
 
         static getAction (name) {
@@ -25,13 +26,7 @@ function blackboxGenerator (desires = []) {
         }
 
         static applicable (goal) {
-            for ( let entry of Object.entries(this.actions) ) {
-                desireName = entry[0]
-                desireClass = entry[1]
-                if ( goal == desireClass )
-                    return false
-            }
-            return true
+            return goal instanceof PlanningGoal
         }
 
         async blackboxExec (domainFile, problemFile) {
@@ -76,8 +71,8 @@ function blackboxGenerator (desires = []) {
                 var args = line
                 // console.log(number, action, args)
                 var intentionClass = this.constructor.getAction(action)
-                var goalInstance = new intentionClass(args)
-                this.plan.push({parallel: number==previousNumber, goal: goalInstance});
+                var intentionInstance = new intentionClass(this.agent, new PlanningGoal({args: args}) )
+                this.plan.push({parallel: number==previousNumber, intention: intentionInstance});
             }
             
             return;
@@ -92,7 +87,7 @@ function blackboxGenerator (desires = []) {
             var pddlProblem = new PddlProblem(this.agent.name)
             pddlProblem.addObject(...this.agent.beliefs.objects) //'a', 'b'
             pddlProblem.addInit(...this.agent.beliefs.literals)
-            pddlProblem.addGoal(...this.goal.effect)
+            pddlProblem.addGoal(...this.goal.parameters.goal)
             var problemFile = yield pddlProblem.saveToFile()
 
             yield this.blackboxExec(domainFile, problemFile)
@@ -101,11 +96,11 @@ function blackboxGenerator (desires = []) {
 
             for (const step of this.plan) {
                 if(step.parallel) {
-                    previousStepGoals.push( this.agent.postSubGoal(step.goal) )
+                    previousStepGoals.push( step.intention.run().catch( err => err ) )
                 }
                 else {
                     yield Promise.all(previousStepGoals)
-                    previousStepGoals = [ this.agent.postSubGoal(step.goal) ]
+                    previousStepGoals = [ step.intention.run().catch( err => err ) ]
                 }
             }
 
@@ -114,10 +109,10 @@ function blackboxGenerator (desires = []) {
 
         }
 
-    }
+    } // end of class Blackbox extends Intention
 
-    for ( let desireClass of desires ) {
-        Blackbox.addAction(desireClass)
+    for ( let intentionClass of intentions ) {
+        Blackbox.addAction(intentionClass)
     }
 
     return Blackbox;

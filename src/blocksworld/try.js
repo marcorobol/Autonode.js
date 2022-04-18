@@ -1,8 +1,7 @@
 const {PickUp, PutDown, Stack, UnStack} = require('.')
 const Intention = require('../bdi/Intention')
-const Goal = require('../bdi/Goal')
-const Agent = require('../Agent')
-const {PddlProblem, PddlDomain, BlackboxGenerator} = require('../../pddl')
+const Agent = require('../bdi/Agent')
+const {PddlProblem, PddlDomain, blackboxGenerator} = require('../pddl')
 
 
 // var blocksworldDomain = new PddlDomain('blocksworld')
@@ -46,7 +45,7 @@ class FakeAction extends Intention {
 }
 
 var a1 = new Agent('a1')
-a1.beliefs.push(...['on-table a', 'on b a', 'clear b', 'empty'])
+a1.beliefs.declare(...['on-table a', 'on b a', 'clear b', 'empty'])
 // a1.desires.push(PickUp)
 // a1.desires.push(PutDown)
 // a1.desires.push(Stack)
@@ -55,13 +54,13 @@ a1.intentions.push(FakeAction)
 a1.intentions.push(blackboxGenerator([PickUp, PutDown, Stack, UnStack])) // always applicable
 
 
-class BlocksWorldGoal extends Goal {
-    static parameters = ['ob']
-    static precondition = []
-    static effect = [ ['holding', 'ob'] ]
-}
+// class BlocksWorldGoal extends Goal {
+//     static parameters = ['ob']
+//     static precondition = []
+//     static effect = [ ['holding', 'ob'] ]
+// }
 
-a1.postSubGoal( new BlocksWorldGoal({ob: 'a'}) )
+a1.postSubGoal( ['holding a'] )
 
 // var blackbox = new Blackbox(new LightOn({l: 'light1'}), './bin/blocks-domain.pddl', './bin/blocks-problem.pddl')
 // var blackbox = new Blackbox(a1, new BlocksWorldGoal({ob: 'a'}))

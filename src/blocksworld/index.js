@@ -1,7 +1,19 @@
-const Goal = require('../bdi/Goal')
+const Intention = require('../bdi/Intention')
 
 
-class PickUp extends Goal {
+class FakeAction extends Intention {
+
+    *exec () {
+        for ( let b of this.groundedEffects )
+            this.agent.beliefs.apply(b)
+        yield new Promise(res=>setTimeout(res,100))
+        this.log('effects applied')
+        // this.log(this.agent.beliefs)
+    }
+
+}
+
+class PickUp extends FakeAction {
 
     static parameters = ['ob']
     static precondition = [ ['clear', 'ob'], ['on-table', 'ob'], ['empty'] ]
@@ -9,7 +21,7 @@ class PickUp extends Goal {
 
 }
 
-class PutDown extends Goal {
+class PutDown extends FakeAction {
 
     static parameters = ['ob']
     static precondition = [ ['holding', 'ob'] ]
@@ -17,7 +29,7 @@ class PutDown extends Goal {
 
 }
 
-class Stack extends Goal {
+class Stack extends FakeAction {
 
     static parameters = ['x', 'y']
     static precondition = [ ['holding', 'x'], ['clear', 'y'] ]
@@ -25,7 +37,7 @@ class Stack extends Goal {
 
 }
 
-class UnStack extends Goal {
+class UnStack extends FakeAction {
 
     static parameters = ['x', 'y']
     static precondition = [ ['on', 'x', 'y'], ['clear', 'x'], ['empty'] ]

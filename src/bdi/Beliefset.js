@@ -1,99 +1,102 @@
+const Observable =  require('../utils/Observable')
 
-class Beliefset {
+
+
+class Beliefset extends Observable { // Implementation based on Observable
+
+
+
+    #objectsMap;
     
     constructor () {
-        this.factsMap = {} // observable facts
-        this.objectsMap = {}
+        super ({})
+        this.#objectsMap = {}
     }
+
+
 
     addObject (obj) {
         if (!(typeof obj === 'string'))
             throw('String expected, got ' + typeof obj + ': ' + obj)
-        this.objectsMap[obj] = obj
+        this.#objectsMap[obj] = obj
     }
 
     removeObject (obj) {
         if (!(typeof obj === 'string'))
             throw('String expected, got ' + typeof obj + ': ' + obj)
-        delete this.objectsMap[obj];
+        delete this.#objectsMap[obj];
     }
 
+    get objects () {
+        return Object.values(this.#objectsMap);
+    }
+
+
+
+    /**
+     * call the declare method with false value
+     * @param {String} fact
+     * @returns changed
+     */
     undeclare (fact) {
-        return this.declare(fact,false)
+        return this.declare(fact, false)
     }
 
-    declare (fact, value=true) {
-        // if (Array.isArray(fact))
-        //     throw(fact + 'is not a valid fact to be declared')
+    /**
+     * 
+     * @param {String} fact 
+     * @param {*} value optional, default value is true
+     * @returns {boolean} true if changed otherwise false
+     */
+    declare (fact, value = true) {
+
         if (!(typeof fact === 'string'))
             throw('String expected, got ' + typeof fact + ': ' + fact)
         if (fact.split(' ')[0] == 'not')
             throw('Fact expected, got a negative literal: ' + fact)
+
+        var changed = this.set(fact, value)
         
-        if (!(fact in this.factsMap) || this.factsMap[fact].value != value)
+        if ( changed )
             for (let obj of fact.split(' ').splice(1))
                 this.addObject(obj)
-
-        if (!(fact in this.factsMap))
-            this.factsMap[fact] = {value: value, observers: []};
-        else if (this.factsMap[fact].value != value)
-            this.factsMap[fact].value = value;
-        else
-            return false; // unchanged
-
-        for (let o of this.factsMap[fact].observers )
-            o(fact, value);
-        return true; // changed and observers notified
+        
+        return changed
     }
 
-    observe (observer, fact) {
-        if (!(fact in this.factsMap))
-            this.factsMap[fact] = {value: undefined, observers: []}
-        this.factsMap[fact].observers.push(observer)
-    }
 
-    unobserve (observer, fact) {
-        if ((fact in this.factsMap)) {
-            let arr = this.factsMap[fact].observers
-            for( var i = 0; i < arr.length; i++){ 
-                if ( arr[i] === observer) { 
-                    arr.splice(i, 1); 
-                    i--; 
-                }
-            }
-        }
-    }
 
-    apply (literal) {
-        var not = literal.split(' ')[0] == 'not'
-        var fact = (not?literal.split(' ').splice(1).join(' '):literal)
-        this.declare(fact, !not)
-    }
-
-    get facts () {
-        return this.factsMap;
-    }
-
+    /**
+     * @return {Array<String>}    Return an Array of String literals (possibly negated facts): fact or not fact
+     */
     get literals () {
-        var literals = {}
-        for ( let entry of Object.entries(this.factsMap) ) {
-            let key = entry[0]
-            let {value,observers} = entry[1]
-            literals[key] = value
-        }
-        return literals;
+        return this.entries.map( ([fact, value]) => (value?fact:'not '+fact) )
     }
 
-    get objects () {
-        return Object.values(this.objectsMap);
-    }
-
-    check (literalConjunction) {
-        for ( let literal of literalConjunction ) {
+    /**
+     * 
+     * @param {String} literal Possibly negated fact, e.g. not light_on
+     */
+    apply (...literals) {
+        for ( let literal of literals ) {
             var not = literal.split(' ')[0] == 'not'
             var fact = (not?literal.split(' ').splice(1).join(' '):literal)
+            this.declare(fact, !not)
+        }
+    }
+
+    /**
+     * Closed World assumption; if i don't know about something then it is false!
+     * 
+     * @param  {...String} literal conjunction of literals
+     * @returns {boolean} true if verified, otherwise false
+     */
+    check (...literals) {
+        for ( let literal of literals ) {
+            let not = literal.split(' ')[0] == 'not'
+            let fact = (not?literal.split(' ').splice(1).join(' '):literal)
             
-            if ( this.factsMap[fact] && this.factsMap[fact].value==true )
+            if ( this[fact] )
                 if ( not )
                     return false;
                 else
@@ -106,17 +109,6 @@ class Beliefset {
         }
 
         return true;
-    }
-
-    static ground (parametrizedConjunction, parametersMap) {
-        return parametrizedConjunction.map( (parametrized) => {
-            let predicate = parametrized[0]
-            let vars = parametrized.slice(1)
-            let literal = predicate
-            for (let v of vars)
-                literal = literal + ' ' + parametersMap[v]
-            return literal
-        })
     }
 
 }
