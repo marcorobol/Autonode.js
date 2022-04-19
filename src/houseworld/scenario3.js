@@ -1,6 +1,9 @@
 const Beliefset =  require('../bdi/Beliefset')
 const Observable =  require('../utils/Observable')
-const Clock =  require('./Clock')
+const Clock =  require('../utils/Clock')
+const Agent = require('../bdi/Agent')
+const Goal = require('../bdi/Goal')
+const Intention = require('../bdi/Intention')
 
 
 
@@ -21,9 +24,9 @@ class House {
             car: { charging: true }
         }
         
-        this.people.bob.observe('name', (k,v)=>console.log('person ' + v) )
+        this.people.bob.observe('name', (v, k)=>console.log('person ' + v) )
         
-        this.people.bob.observe('in_room', (k,v)=>console.log('in_room bob ' + v) )
+        this.people.bob.observe('in_room', (v, k)=>console.log('in_room bob ' + v) )
 
         Clock.startTimer()
         Clock.wallClock()
@@ -78,3 +81,30 @@ Clock.global.observe('mm', (key, mm) => {
     if(time.hh==20 && time.mm==15)
         house.people.bob.in_room = 'living_room'
 })
+
+
+
+var a1 = new Agent('house_agent')
+
+class SetupAlarm extends Goal {
+
+}
+
+class MyAlarm extends Intention {
+    static applicable(goal) {
+        return goal instanceof SetupAlarm
+    }   
+    *exec () {
+        while(true) {
+            yield Clock.global.notifyChange('mm')
+            if (Clock.global.hh == 6) {
+                console.log('ALARM, it\'s 6am!')
+                break;
+            }
+        }
+    }
+}
+
+a1.intentions.push(MyAlarm)
+
+a1.postSubGoal(new SetupAlarm({hh:6, mm:0}))
