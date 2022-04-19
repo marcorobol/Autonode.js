@@ -11,10 +11,16 @@
 
 /**
  * Observable
+ * @class Observable
+ * @constructor
  */
 class Observable {
     #map;
 
+    /**
+     * @constructor Observable
+     * @param {*} init 
+     */
     constructor (init) {
         this.#map = {}
         for (let [key,value] of Object.entries(init)) {
