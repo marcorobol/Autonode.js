@@ -35,7 +35,7 @@ class Beliefset extends Observable { // Implementation based on Observable
 
     /**
      * call the declare method with false value
-     * @param {String} fact
+     * @param {String} fact A fact is composed by a predicate and arguments e.g. 'person_in_room bob kitchen'
      * @returns changed
      */
     undeclare (fact) {
@@ -44,8 +44,8 @@ class Beliefset extends Observable { // Implementation based on Observable
 
     /**
      * 
-     * @param {String} fact 
-     * @param {*} value optional, default value is true
+     * @param {String} fact A fact is composed by a predicate and arguments e.g. 'person_in_room bob kitchen'
+     * @param {boolean} value Fact status, true or false. Default value is true
      * @returns {boolean} true if changed otherwise false
      */
     declare (fact, value = true) {
@@ -67,7 +67,7 @@ class Beliefset extends Observable { // Implementation based on Observable
 
 
     /**
-     * @return {Array<String>}    Return an Array of String literals (possibly negated facts): fact or not fact
+     * @return {Array<String>}    Return an Array of String literals (possibly negated facts) e.g. 'light_on kitchen_light' or 'not light_on kitchen_light'
      */
     get literals () {
         return this.entries.map( ([fact, value]) => (value?fact:'not '+fact) )
@@ -75,7 +75,7 @@ class Beliefset extends Observable { // Implementation based on Observable
 
     /**
      * 
-     * @param {String} literal Possibly negated fact, e.g. not light_on
+     * @param {String} literal Possibly negated fact, e.g. 'not light_on'
      */
     apply (...literals) {
         for ( let literal of literals ) {
@@ -88,7 +88,7 @@ class Beliefset extends Observable { // Implementation based on Observable
     /**
      * Closed World assumption; if i don't know about something then it is false!
      * 
-     * @param  {...String} literal conjunction of literals
+     * @param  {...String} literals Iterable of literals; intended as a conjunction of literals
      * @returns {boolean} true if verified, otherwise false
      */
     check (...literals) {

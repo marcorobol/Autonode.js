@@ -1,16 +1,22 @@
+const Beliefset =  require('./Beliefset')
+const Intention = require('./Intention');
+
+
 
 /**
- * BDI
+ * @class Agent
  */
-const Beliefset =  require('./Beliefset')
-
-
 class Agent {
 
     constructor (name) {
         this.name = name
+
+        /** @type {Beliefset} beliefs */
         this.beliefs = new Beliefset()
-        // this.desires = []
+
+        this.beliefs.observeAny( (v,fact) => this.log( 'Beliefset: ' + (v?fact:'not '+fact) ) )
+
+        /** @type {Array<Intention>} intentions */
         this.intentions = []
     }
 

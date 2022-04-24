@@ -12,44 +12,50 @@
 /**
  * Observable
  * @class Observable
- * @constructor
  */
 class Observable {
-    #map;
+    #values;
+    #observers;
 
     /**
      * @constructor Observable
      * @param {*} init 
      */
-    constructor (init) {
-        this.#map = {}
+    constructor (init={}) {
+        this.#values = {}
+        this.#observers = {}
+        this.genericObservers = []
         for (let [key,value] of Object.entries(init)) {
-            this.defineProperty (key, value);
+            this.set (key, value);
         }
     }
-
+    
     /**
      * 
-     * @param {*} key 
-     * @param {*} value optional
+     * @param {*} key
      */
-    defineProperty (key, value = undefined) {
-        if (!(key in this.#map)) {
-            this.#map[key] = { value: value, observers: {} }
+    defineProperty (key) {
+
+        if (!(key in this.#observers)) {
+            this.#observers[key] = {}
+        }
+
+        if (!(this.hasOwnProperty(key))) {
             this[key] = {}
             Object.defineProperty (this, key, {
-                get: () => this.#map[key].value,
+                get: () => this.#values[key],
                 set: (v) => {
-                    this.#map[key].value = v;
+                    this.#values[key] = v;
                     Promise.resolve().then( () => {
-                        for (let o in this.#map[key].observers)
-                            this.#map[key].observers[o](v, key);
+                        for (let obs of this.genericObservers)
+                            obs(v, key);
+                        for (let obs of Object.values(this.#observers[key]))
+                            obs(v, key);
                     }).catch( err => console.error(err) )
                 }
             })
-            return true;
         }
-        return false;
+
     }
     
     /**
@@ -58,11 +64,10 @@ class Observable {
      * @param {*} value 
      * @returns true if changed, false otherwise
      */
-    set (key, value = undefined) {
-        if ( this.defineProperty(key, value) )
-            return true
-        else if ( this[key] != value ) {
-            this[key] = value;
+    set (key, value) {
+        this.defineProperty (key)
+        if ( this[key] != value ) {
+            this[key] = value; // use earlier defined setter and call observers
             return true
         }
         else
@@ -73,29 +78,31 @@ class Observable {
      * @return {Array}    Return an array of [key, value] to iterate over
      */
     get entries () {
-        return Object.entries(this.#map).map( ([key, {value, observers}]) => [key, value] );
+        return Object.entries(this.#values).map( ([key, {value, observers}]) => [key, value] );
+    }
+
+    observeAny (observer) {
+        this.genericObservers.push( observer )
     }
 
     /**
      * 
      * @param {*} key 
-     * @param {observer} observer function(key, value)
+     * @param {observer} observer function(value, key)
      */
     observe (key, observer) {
-        if (!(key in this.#map)) {
-            this.defineProperty (key)
-        }
-            this.#map[key].observers[observer] = observer
+        this.defineProperty(key)
+        this.#observers[key][observer] = observer
     }
 
     /**
      * 
      * @param {*} key 
-     * @param {observer} observer function(key, value)
+     * @param {observer} observer function(value, key)
      */
     unobserve (key, observer) {
-        if (key in this.#map)
-            delete this.#map[key].observers[observer]
+        if (key in this.#observers)
+            delete this.#observers[key][observer]
     }
 
     /**
@@ -106,8 +113,8 @@ class Observable {
     async notifyChange (key) {
         return new Promise( res => {
             var tmpObs = (value, key) => {
-                res(value)
                 this.unobserve(key, tmpObs)
+                res(value)
             }
             this.observe(key, tmpObs)
         })

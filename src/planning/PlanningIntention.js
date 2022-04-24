@@ -47,11 +47,11 @@ class PlanningIntention extends Intention {
     /**
      * 
      * @param {Array<String>} parametrizedLiterals Array of parametrized literals;
-     * e.g. [[\'on, \'l\'], [\'in_room\', \'p\', \'r\']
+     * e.g. [['on, 'l'], ['in_room', 'p', 'r']
      * @param {Object} parametersMap Map of parameters key->value;
      * e.g. {l: light1, p: bob, room: kitchen}
      * @returns {Array<String>} Array of grounded literals;
-     * e.g. [\'on light1\', \'in_room bob kitchen\']
+     * e.g. ['on light1', 'in_room bob kitchen']
      */
     static ground (parametrizedLiterals, parametersMap) {
         return parametrizedLiterals.map( (literal) => {

@@ -1,16 +1,20 @@
 const Goal = require('./Goal');
+const Agent = require('./Agent');
 
 var nextId = 0
 
+/**
+ * @class Intention
+ */
 class Intention {
     
-    // postSubGoal (subgoal) {
-    //     return this.agent.postSubGoal(subgoal);
-    // }
-
     constructor (agent, goal) {
         this.id = nextId++
+        
+        /** @type {Agent} agent */
         this.agent = agent
+
+        /** @type {Goal} goal */
         this.goal = goal
     }
 

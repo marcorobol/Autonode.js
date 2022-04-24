@@ -12,21 +12,12 @@ const Observable =  require('./Observable')
  */
 class Clock {
 
+    /** @type {Observable} {dd, hh, mm} */
     static global = new Observable( {dd: 0, hh: 0, mm: 0} )
 
     static format() {
         var time = Clock.global
-        return time.dd + ':' + (time.hh<10?'0':'')+time.hh + ':' + (time.mm==0?'00':time.mm)
-    }
-
-    static wallClock() {
-        // Wall clock
-        Clock.global.observe('mm', mm => {
-            var time = Clock.global
-            process.stdout.clearLine(0);
-            process.stdout.cursorTo(0);
-            process.stdout.write( Clock.format() + '\t');
-        })
+        return '' + time.dd + ':' + (time.hh<10?'0':'')+time.hh + ':' + (time.mm==0?'00':time.mm)
     }
 
     static #start = true
@@ -57,25 +48,15 @@ class Clock {
                     Clock.global.dd += 1
                 }
             }
+            
+            // Here, time is logged immediately before any other observable gets updated!
+            process.stdout.clearLine(0);
+            process.stdout.cursorTo(0);
+            process.stdout.write( Clock.format() + '\t');
         }
     }
 
 }
-
-
-
-// // Daily schedule
-// Clock.global.observe('mm', (mm) => {
-//     var time = Clock.global
-//     if(time.hh==12 && time.mm==0)
-//         console.log('lunch time '+Clock.format())
-//     if(time.hh==13 && time.mm==30)
-//         console.log('end lunch time '+Clock.format())
-//     if(time.hh==19 && time.mm==0)
-//         console.log('dinner time '+Clock.format())
-//     if(time.hh==20 && time.mm==15)
-//         console.log('end dinner time '+Clock.format())
-// })
 
 
 

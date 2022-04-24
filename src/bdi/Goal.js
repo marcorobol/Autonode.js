@@ -1,10 +1,15 @@
 
 var nextId = 0
 
+/**
+ * @class Goal
+ */
 class Goal {
 
     constructor (parameters = {}) {
         this.id = nextId++
+
+        /** @type {*} parameters */
         this.parameters = parameters
         
         // // [x, y] given parameters=['x','y']

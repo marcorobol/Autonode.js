@@ -11,6 +11,7 @@ class Environment extends Beliefset {
 class House extends Environment {
 
     constructor () {
+        super ()
         this.declare('person marco')
         this.declare('person_in marco kitchen')
         this.declare('room kitchen')
