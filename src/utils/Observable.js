@@ -3,8 +3,9 @@
 /**
  * Observer callback function
  * @callback observer
- * @param {*} key
- * @param {*} value
+ * @param {*} value         value changed 
+ * @param {*} key           key whose value changed
+ * @param {*} observable    observable object
  */
 
 
@@ -48,9 +49,9 @@ class Observable {
                     this.#values[key] = v;
                     Promise.resolve().then( () => {
                         for (let obs of this.genericObservers)
-                            obs(v, key);
+                            obs(v, key, this);
                         for (let obs of Object.values(this.#observers[key]))
-                            obs(v, key);
+                            obs(v, key, this);
                     }).catch( err => console.error(err) )
                 }
             })
@@ -88,7 +89,7 @@ class Observable {
     /**
      * 
      * @param {*} key 
-     * @param {observer} observer function(value, key)
+     * @param {observer} observer function(value, key, observable)
      */
     observe (key, observer) {
         this.defineProperty(key)
@@ -98,7 +99,7 @@ class Observable {
     /**
      * 
      * @param {*} key 
-     * @param {observer} observer function(value, key)
+     * @param {observer} observer function(value, key, observable)
      */
     unobserve (key, observer) {
         if (key in this.#observers)

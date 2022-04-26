@@ -17,6 +17,7 @@ class Light extends Observable {
     }
     switchOffLight (l) {
         this.status = 'off'
+        this.house.utilities.electricity.consumption -= 1;
         // Include some messages logged on the console!
         console.log('Kitchen light turned off')
     }

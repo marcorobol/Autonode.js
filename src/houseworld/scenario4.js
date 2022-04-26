@@ -43,7 +43,7 @@ myAgent.intentions.push(SenseLightsIntention)
 myAgent.postSubGoal( new SenseLightsGoal( [myHouse.devices.kitchen_light, myHouse.devices.garage_light] ) )
 
 // Simulated Daily/Weekly schedule
-Clock.global.observe('mm', (key, mm) => {
+Clock.global.observe('mm', (mm) => {
     var time = Clock.global
     if(time.hh==6 && time.mm==0)
         myHouse.devices.kitchen_light.switchOnLight()

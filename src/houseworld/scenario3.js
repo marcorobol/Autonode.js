@@ -29,7 +29,7 @@ class House {
         this.people.bob.observe('in_room', (v, k)=>console.log('in_room bob ' + v) )
 
         Clock.startTimer()
-        Clock.wallClock()
+        // Clock.wallClock()
     }
 
     moveFromKitchenToLivingRoom (name) {
