@@ -87,7 +87,11 @@ Clock.global.observe('mm', (key, mm) => {
 var a1 = new Agent('house_agent')
 
 class SetupAlarm extends Goal {
-
+    constructor(hh, mm) {
+        super()
+        this.hh = hh
+        this.mm = mm
+    }
 }
 
 class MyAlarm extends Intention {
@@ -97,7 +101,7 @@ class MyAlarm extends Intention {
     *exec () {
         while(true) {
             yield Clock.global.notifyChange('mm')
-            if (Clock.global.hh == 6) {
+            if (Clock.global.hh == this.goal.hh) {
                 console.log('ALARM, it\'s 6am!')
                 break;
             }

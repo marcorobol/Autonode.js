@@ -71,7 +71,13 @@ function blackboxGenerator (intentions = []) {
                 var args = line
                 // console.log(number, action, args)
                 var intentionClass = this.constructor.getAction(action)
-                var intentionInstance = new intentionClass(this.agent, new PlanningGoal({args: args}) )
+                var mappedArgs = {}
+                for (let index = 0; index < intentionClass.parameters.length; index++) {
+                    let k = intentionClass.parameters[index]
+                    let v = args[index]
+                    mappedArgs[k] = v
+                }
+                var intentionInstance = new intentionClass(this.agent, new PlanningGoal( {args: mappedArgs} ) )
                 this.plan.push({parallel: number==previousNumber, intention: intentionInstance});
             }
             
@@ -102,6 +108,7 @@ function blackboxGenerator (intentions = []) {
                     yield Promise.all(previousStepGoals)
                     previousStepGoals = [ step.intention.run().catch( err => err ) ]
                 }
+                this.log(step.intention.toString())
             }
 
             // wait for last steps to complete before finish blackbox plan execution intention

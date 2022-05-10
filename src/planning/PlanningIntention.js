@@ -17,10 +17,14 @@ class PlanningIntention extends Intention {
     //     yield applyEffect()
     // }
 
+    toString() {
+        return this.constructor.name + '#'+this.id + ' effect:' + this.effect
+    }
+
 
 
     get precondition () {
-        return PlanningIntention.ground(this.constructor.precondition, this.goal.parameters)
+        return PlanningIntention.ground(this.constructor.precondition, this.goal.parameters.args)
     }
 
     checkPrecondition () {
@@ -30,7 +34,7 @@ class PlanningIntention extends Intention {
 
 
     get effect () {
-        return PlanningIntention.ground(this.constructor.effect, this.goal.parameters)
+        return PlanningIntention.ground(this.constructor.effect, this.goal.parameters.args)
     }
 
     checkEffect () {

@@ -1,10 +1,10 @@
-const Intention = require('../bdi/Intention')
+const PlanningIntention = require('../planning/PlanningIntention')
 
 
-class FakeAction extends Intention {
+class FakeAction extends PlanningIntention {
 
     *exec () {
-        for ( let b of this.groundedEffects )
+        for ( let b of this.effect )
             this.agent.beliefs.apply(b)
         yield new Promise(res=>setTimeout(res,100))
         this.log('effects applied')
@@ -25,7 +25,7 @@ class PutDown extends FakeAction {
 
     static parameters = ['ob']
     static precondition = [ ['holding', 'ob'] ]
-    static effect = [ ['holding', 'ob'], ['empty'], ['clear', 'ob'], ['on-table', 'ob'] ]
+    static effect = [ ['not holding', 'ob'], ['empty'], ['clear', 'ob'], ['on-table', 'ob'] ]
 
 }
 
