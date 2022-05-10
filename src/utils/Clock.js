@@ -38,7 +38,7 @@ class Clock {
             if(mm<60-15)
                 Clock.global.mm += 15
             else {
-                if(hh<24) {
+                if(hh<23) {
                     Clock.global.hh += 1 // increased hh but mm still 45
                     Clock.global.mm = 0 // however, observers are handled as microtask so at the time they are called everything will be sync
                 }

@@ -89,35 +89,47 @@ class Observable {
     /**
      * 
      * @param {*} key 
+     * @param {*} observerKey
      * @param {observer} observer function(value, key, observable)
      */
-    observe (key, observer) {
+    observe (key, observer, observerKey = null) {
         this.defineProperty(key)
-        this.#observers[key][observer] = observer
+        if (observerKey == null) {
+            this.#observers[key][observer] = observer;
+        } else {
+            this.#observers[key][observerKey] = observer;
+        }
     }
 
     /**
      * 
      * @param {*} key 
+     * @param {*} observerKey
      * @param {observer} observer function(value, key, observable)
      */
-    unobserve (key, observer) {
-        if (key in this.#observers)
-            delete this.#observers[key][observer]
+    unobserve (key, observer, observerKey = null) {
+        if (key in this.#observers){
+            if (observerKey == null) {
+                delete this.#observers[key][observer];
+            } else {
+                delete this.#observers[key][observerKey];
+            }
+        }
     }
 
     /**
      * 
      * @param {*} key
+     * @param {*} observerKey
      * @returns {Promise} Promise that resolves when observed value changes
      */
-    async notifyChange (key) {
+    async notifyChange (key, observerKey = null) {
         return new Promise( res => {
-            var tmpObs = (value, key) => {
-                this.unobserve(key, tmpObs)
+            var tmpObs = (value, key, observerKey) => {
+                this.unobserve(key, tmpObs, observerKey)
                 res(value)
             }
-            this.observe(key, tmpObs)
+            this.observe(key, tmpObs, observerKey)
         })
     }
 
