@@ -2,11 +2,12 @@ const Intention = require('../bdi/Intention')
 const PddlDomain = require('./PddlDomain')
 const PddlProblem = require('./PddlProblem')
 const execFile = require('child_process').execFile;
-const PlanningGoal =  require('../planning/PlanningGoal')
+const pddlActionGoal =  require('./actions/pddlActionGoal')
+const BlackboxGoal =  require('./BlackboxGoal')
 
 
 
-function blackboxGenerator (intentions = []) {
+function blackboxIntentionGenerator (intentions = []) {
 
     var Blackbox = class extends Intention {
         
@@ -26,7 +27,7 @@ function blackboxGenerator (intentions = []) {
         }
 
         static applicable (goal) {
-            return goal instanceof PlanningGoal
+            return goal instanceof BlackboxGoal
         }
 
         async blackboxExec (domainFile, problemFile) {
@@ -77,7 +78,7 @@ function blackboxGenerator (intentions = []) {
                     let v = args[index]
                     mappedArgs[k] = v
                 }
-                var intentionInstance = new intentionClass(this.agent, new PlanningGoal( {args: mappedArgs} ) )
+                var intentionInstance = new intentionClass(this.agent, new pddlActionGoal( {args: mappedArgs} ) )
                 this.plan.push({parallel: number==previousNumber, intention: intentionInstance});
             }
             
@@ -136,4 +137,4 @@ function blackboxGenerator (intentions = []) {
 
 
 
-module.exports = blackboxGenerator
+module.exports = blackboxIntentionGenerator

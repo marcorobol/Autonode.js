@@ -1,8 +1,8 @@
-const Intention =  require('../bdi/Intention')
+const Intention =  require('../../bdi/Intention')
 
 
 
-class PlanningIntention extends Intention {
+class pddlActionIntention extends Intention {
 
     // Example LightOn:
     // static parameters = ['l']
@@ -24,7 +24,7 @@ class PlanningIntention extends Intention {
 
 
     get precondition () {
-        return PlanningIntention.ground(this.constructor.precondition, this.goal.parameters.args)
+        return pddlActionIntention.ground(this.constructor.precondition, this.goal.parameters.args)
     }
 
     checkPrecondition () {
@@ -34,7 +34,7 @@ class PlanningIntention extends Intention {
 
 
     get effect () {
-        return PlanningIntention.ground(this.constructor.effect, this.goal.parameters.args)
+        return pddlActionIntention.ground(this.constructor.effect, this.goal.parameters.args)
     }
 
     checkEffect () {
@@ -72,4 +72,4 @@ class PlanningIntention extends Intention {
 
 
 
-module.exports = PlanningIntention
+module.exports = pddlActionIntention

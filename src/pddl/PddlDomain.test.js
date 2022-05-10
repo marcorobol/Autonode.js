@@ -4,6 +4,20 @@ const Goal = require('../bdi/Goal')
 
 
 
+// var blocksworldDomain = new PddlDomain('blocksworld')
+// blocksworldDomain.addPredicate(['clear', 'x'])
+// blocksworldDomain.addPredicate(['on-table', 'x'])
+// blocksworldDomain.addPredicate(['holding', 'x'])
+// blocksworldDomain.addPredicate(['on', 'x' ,'y'])
+// blocksworldDomain.addPredicate(['empty'])
+// blocksworldDomain.addAction(PickUp)
+// blocksworldDomain.addAction(PutDown)
+// blocksworldDomain.addAction(Stack)
+// blocksworldDomain.addAction(UnStack)
+// blocksworldDomain.saveToFile()
+
+
+
 describe('addPredicate()', () => {
     var lightDomain = new PddlDomain('lights')
     var predicate = ['switched-on', 'l', 'll']

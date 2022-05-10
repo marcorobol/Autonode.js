@@ -1,4 +1,4 @@
-const Agent = require('../bdi/Agent')
+const Agent = require('../../bdi/Agent')
 const PlanningGoal =  require('./PlanningGoal')
 const PlanningIntention =  require('./PlanningIntention')
 

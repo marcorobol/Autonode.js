@@ -1,5 +1,5 @@
-const Intention =  require('../bdi/Intention')
-const BeliefSet =  require('../bdi/Beliefset')
+const Intention =  require('../../bdi/Intention')
+const BeliefSet =  require('../../bdi/Beliefset')
 
 class PddlIntention extends Intention {
 

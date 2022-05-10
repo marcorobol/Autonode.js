@@ -1,7 +1,7 @@
-const PlanningIntention = require('../planning/PlanningIntention')
+const pddlActionIntention = require('../pddl/actions/pddlActionIntention')
 
 
-class FakeAction extends PlanningIntention {
+class FakeAction extends pddlActionIntention {
 
     *exec () {
         for ( let b of this.effect )

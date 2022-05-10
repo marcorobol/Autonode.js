@@ -14,7 +14,7 @@ class Agent {
         /** @type {Beliefset} beliefs */
         this.beliefs = new Beliefset()
 
-        this.beliefs.observeAny( (v,fact) => this.log( 'Beliefset: ' + (v?fact:'not '+fact) ) )
+        this.beliefs.observeAny( (v,fact) => this.log( 'Belief changed: ' + (v?fact:'not '+fact) ) )
 
         /** @type {Array<Intention>} intentions */
         this.intentions = []
