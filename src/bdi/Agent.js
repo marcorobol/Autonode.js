@@ -42,7 +42,7 @@ class Agent {
     
             var intention = new intentionClass(this, subGoal)
             
-            var success = await intention.run().catch( err => {this.log('Error in run() intention:', err)} )
+            var success = await intention.run().catch( err => {} )
     
             if ( success ) {
                 this.log('Succesfully used intention', intentionClass.name, 'to achieve goal', subGoal.toString())

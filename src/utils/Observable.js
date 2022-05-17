@@ -82,6 +82,10 @@ class Observable {
         return Object.entries(this.#values);
     }
 
+    /**
+     * 
+     * @param {observer} observer function(value, key, observable)
+     */
     observeAny (observer) {
         this.genericObservers.push( observer )
     }

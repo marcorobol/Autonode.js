@@ -62,7 +62,7 @@ function blackboxIntentionGenerator (intentions = []) {
             if (!planBeginned) {
                 this.log('no plan found')
                 this.log(result)
-                return Promise.reject('Plan not found');
+                return Promise.reject(new Error('Plan not found'));
             }
 
             var previousNumber = 0
@@ -78,7 +78,7 @@ function blackboxIntentionGenerator (intentions = []) {
                     let v = args[index]
                     mappedArgs[k] = v
                 }
-                var intentionInstance = new intentionClass(this.agent, new pddlActionGoal( {args: mappedArgs} ) )
+                var intentionInstance = new intentionClass(this.agent, new pddlActionGoal(mappedArgs) )
                 this.plan.push({parallel: number==previousNumber, intention: intentionInstance});
             }
             
@@ -102,14 +102,19 @@ function blackboxIntentionGenerator (intentions = []) {
             var previousStepGoals = []
 
             for (const step of this.plan) {
-                if(step.parallel) {
-                    previousStepGoals.push( step.intention.run().catch( err => err ) )
+                if (step.parallel) {
+                    this.log('Starting concurrent step with Intention: ' + step.intention.toString())
                 }
                 else {
                     yield Promise.all(previousStepGoals)
-                    previousStepGoals = [ step.intention.run().catch( err => err ) ]
+                    previousStepGoals = []
+                    this.log('Starting sequential step with Intention: ' + step.intention.toString())
                 }
-                this.log(step.intention.toString())
+                previousStepGoals.push(
+                    step.intention.run().catch( err => {
+                        return Promise.reject(new Error('Plan execution aborted'));
+                    } )
+                )
             }
 
             // wait for last steps to complete before finish blackbox plan execution intention

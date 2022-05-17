@@ -24,7 +24,7 @@ class pddlActionIntention extends Intention {
 
 
     get precondition () {
-        return pddlActionIntention.ground(this.constructor.precondition, this.goal.parameters.args)
+        return pddlActionIntention.ground(this.constructor.precondition, this.goal.parameters)
     }
 
     checkPrecondition () {
@@ -34,7 +34,7 @@ class pddlActionIntention extends Intention {
 
 
     get effect () {
-        return pddlActionIntention.ground(this.constructor.effect, this.goal.parameters.args)
+        return pddlActionIntention.ground(this.constructor.effect, this.goal.parameters)
     }
 
     checkEffect () {
