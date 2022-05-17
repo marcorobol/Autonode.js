@@ -1,11 +1,10 @@
-const blackboxGenerator = require('./Blackbox')
 const Agent = require('../bdi/Agent')
 const PlanningGoal =  require('../planning/PlanningGoal')
-const PlanningIntention =  require('../planning/PlanningIntention')
+const pddlActionIntention =  require('../pddl/actions/pddlActionIntention')
 
 
 
-class LightOn extends PlanningIntention {
+class LightOn extends pddlActionIntention {
 
     static parameters = ['l'];
     static precondition = [ ['switched-off', 'l'] ];
@@ -28,7 +27,7 @@ test('Blackbox.blackboxExec()', async () => {
 
     var a1 = new Agent('a1')
 
-    var BlackboxIntention = blackboxGenerator([LightOn])
+    var BlackboxIntention = require('./Blackbox')([LightOn])
     var i1 = new BlackboxIntention(a1, new PlanningGoal({}))
 
     await i1.blackboxExec('./src/pddl/domain-lights.test.pddl', './src/pddl/problem-lights.test.pddl')
@@ -41,7 +40,7 @@ test('Blackbox.run()', async () => {
     var a1 = new Agent('a2')
     a1.beliefs.declare('switched-off l1')
 
-    var BlackboxIntention = blackboxGenerator([LightOn])
+    var BlackboxIntention = require('./Blackbox')([LightOn])
     var i1 = new BlackboxIntention(a1, new PlanningGoal({goal: ['switched-on l1']}))
 
     expect( await i1.run() ).toBe(true);

@@ -3,13 +3,13 @@ const PddlDomain = require('./PddlDomain')
 const PddlProblem = require('./PddlProblem')
 const execFile = require('child_process').execFile;
 const pddlActionGoal =  require('./actions/pddlActionGoal')
-const BlackboxGoal =  require('./BlackboxGoal')
+const PlanningGoal =  require('./PlanningGoal')
 
 
 
-function blackboxIntentionGenerator (intentions = []) {
+function setup (intentions = []) {
 
-    var Blackbox = class extends Intention {
+    var PlanningIntention = class extends Intention {
         
         constructor (agent, goal) {
             super(agent, goal)
@@ -27,7 +27,7 @@ function blackboxIntentionGenerator (intentions = []) {
         }
 
         static applicable (goal) {
-            return goal instanceof BlackboxGoal
+            return goal instanceof PlanningGoal
         }
 
         async blackboxExec (domainFile, problemFile) {
@@ -125,10 +125,10 @@ function blackboxIntentionGenerator (intentions = []) {
     } // end of class Blackbox extends Intention
 
     for ( let intentionClass of intentions ) {
-        Blackbox.addAction(intentionClass)
+        PlanningIntention.addAction(intentionClass)
     }
 
-    return Blackbox;
+    return {PlanningIntention};
 }
 
 
@@ -142,4 +142,4 @@ function blackboxIntentionGenerator (intentions = []) {
 
 
 
-module.exports = blackboxIntentionGenerator
+module.exports = setup

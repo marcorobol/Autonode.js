@@ -7,9 +7,9 @@ const fetch = require('node-fetch') // import fetch from 'node-fetch';
 
 
 
-function onlinePlannerGenerator (intentions = []) {
+function setup (intentions = []) {
 
-    var Blackbox = class extends Intention {
+    var OnlinePlanning = class extends Intention {
         
         constructor (agent, goal) {
             super(agent, goal)
@@ -30,7 +30,7 @@ function onlinePlannerGenerator (intentions = []) {
             return goal instanceof PlanningGoal
         }
 
-        async blackboxExec (domainFile, problemFile) {
+        async doPlan (domainFile, problemFile) {
 
             // console.log(JSON.stringify( {domain: domainFile.content, problem: problemFile.content} ))
             var res = await fetch("http://solver.planning.domains/solve", {
@@ -48,10 +48,10 @@ function onlinePlannerGenerator (intentions = []) {
             // console.log(res);
             // console.log(res.result.plan);
 
-            if (!res.result.plan & !res.result.output.split('\n')[0] == ' --- OK.') {
+            if (!res.result.plan && res.result.output.split('\n')[0] != ' --- OK.') {
                 this.log('No plan found')
                 this.log(res)
-                return Promise.reject(new Error('Plan not found'));
+                throw new Error('Plan not found');
             }
 
             this.log('Plan found:')
@@ -60,7 +60,7 @@ function onlinePlannerGenerator (intentions = []) {
             if (res.result.plan) {
                 for (let step of res.result.plan) {
                     let s = step.name.replace('(','').replace(')','').split(' ')
-                    this.log(s)
+                    this.log('- ' + step.name)
                     planStruct.push(s);
                 }
             }
@@ -97,22 +97,22 @@ function onlinePlannerGenerator (intentions = []) {
             pddlProblem.addGoal(...this.goal.parameters.goal)
             var problemFile = yield pddlProblem.saveToFile()
 
-            yield this.blackboxExec(pddlDomain, pddlProblem)
+            yield this.doPlan(pddlDomain, pddlProblem)
 
             var previousStepGoals = []
 
             for (const step of this.plan) {
                 if (step.parallel) {
-                    this.log('Starting concurrent step with Intention: ' + step.intention.toString())
+                    this.log('Starting concurrent step ' + step.intention.toString())
                 }
                 else {
                     yield Promise.all(previousStepGoals)
                     previousStepGoals = []
-                    this.log('Starting sequential step with Intention: ' + step.intention.toString())
+                    this.log('Starting sequential step ' + step.intention.toString())
                 }
                 previousStepGoals.push(
                     step.intention.run().catch( err => {
-                        return Promise.reject(new Error('Plan execution aborted'));
+                        throw err//new Error('Step failed');
                     } )
                 )
             }
@@ -125,10 +125,10 @@ function onlinePlannerGenerator (intentions = []) {
     } // end of class Blackbox extends Intention
 
     for ( let intentionClass of intentions ) {
-        Blackbox.addAction(intentionClass)
+        OnlinePlanning.addAction(intentionClass)
     }
 
-    return Blackbox;
+    return {OnlinePlanning};
 }
 
 
@@ -142,4 +142,4 @@ function onlinePlannerGenerator (intentions = []) {
 
 
 
-module.exports = onlinePlannerGenerator
+module.exports = setup

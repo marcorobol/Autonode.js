@@ -51,14 +51,14 @@ test('Observable => fields updated all together and observers notified at the en
 
 test('Observable => observers notified later but with value of the update', async () => {
     
-    var o1 = new Observable( { name:'bob'} )
+    let o1 = new Observable( { name: 1 } )
     
     o1.observe('name', value => {
-        expect(value=='intermediate_name' || value=='final_name').toBe(true)
+        expect(value==2 || value==3).toBe(true)
     })
 
-    o1.name = 'intermediate_name'
-    o1.name = 'final_name'
+    o1.name = 2
+    o1.name = 3
 
 });
 

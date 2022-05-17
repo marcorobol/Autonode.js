@@ -129,11 +129,24 @@ class Observable {
      */
     async notifyChange (key, observerKey = null) {
         return new Promise( res => {
-            var tmpObs = (value, key, observerKey) => {
+            var tmpObs = (value, key, observer) => {
                 this.unobserve(key, tmpObs, observerKey)
                 res(value)
             }
             this.observe(key, tmpObs, observerKey)
+        })
+    }
+
+    /**
+     * 
+     * @returns {Promise} Promise that resolves when any among the observed values changes
+     */
+    async notifyAnyChange () {
+        return new Promise( res => {
+            var tmpObs = (value, key, observer) => {
+                res(value)
+            }
+            this.observeAny(tmpObs)
         })
     }
 

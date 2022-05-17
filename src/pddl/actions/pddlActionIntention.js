@@ -18,7 +18,8 @@ class pddlActionIntention extends Intention {
     // }
 
     toString() {
-        return this.constructor.name + '#'+this.id + ' effect:' + this.effect
+        // return this.constructor.name + '#'+this.id + ' effect:' + this.effect
+        return '(' + this.constructor.name + ' ' + Object.values(this.goal.parameters).join(' ') + ')' + ' Effect: ' + this.effect
     }
 
 

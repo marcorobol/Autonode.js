@@ -1,10 +1,53 @@
-const {PickUp, PutDown, Stack, UnStack} = require('./blocksworldIntention')
 const Intention = require('../bdi/Intention')
 const Agent = require('../bdi/Agent')
 const PlanningGoal = require('../pddl/PlanningGoal')
-const BlackboxIntentionGenerator = require('../pddl/BlackboxIntentionGenerator')
+const pddlActionIntention = require('../pddl/actions/pddlActionIntention')
 
 
+
+class FakeAction extends pddlActionIntention {
+
+    *exec () {
+        for ( let b of this.effect )
+            this.agent.beliefs.apply(b)
+        yield new Promise(res=>setTimeout(res,100))
+        this.log('effects applied')
+        // this.log(this.agent.beliefs)
+    }
+
+}
+
+class PickUp extends FakeAction {
+
+    static parameters = ['ob']
+    static precondition = [ ['clear', 'ob'], ['on-table', 'ob'], ['empty'] ]
+    static effect = [ ['holding', 'ob'], ['not empty'], ['not clear', 'ob'], ['not on-table', 'ob'] ]
+
+}
+
+class PutDown extends FakeAction {
+
+    static parameters = ['ob']
+    static precondition = [ ['holding', 'ob'] ]
+    static effect = [ ['not holding', 'ob'], ['empty'], ['clear', 'ob'], ['on-table', 'ob'] ]
+
+}
+
+class Stack extends FakeAction {
+
+    static parameters = ['x', 'y']
+    static precondition = [ ['holding', 'x'], ['clear', 'y'] ]
+    static effect = [ ['holding', 'x'], ['empty'], ['clear', 'x'], ['not clear', 'y'], ['on', 'x', 'y'] ]
+
+}
+
+class UnStack extends FakeAction {
+
+    static parameters = ['x', 'y']
+    static precondition = [ ['on', 'x', 'y'], ['clear', 'x'], ['empty'] ]
+    static effect = [ ['holding', 'x'], ['not empty'], ['not clear', 'x'], ['clear', 'y'], ['not on', 'x', 'y'] ]
+
+}
 
 // var blocksworldDomain = new PddlDomain('blocksworld')
 // blocksworldDomain.addPredicate(['clear', 'x'])
@@ -33,7 +76,8 @@ a1.beliefs.declare('on-table a')
 a1.beliefs.declare('on b a')
 a1.beliefs.declare('clear b')
 a1.beliefs.declare('empty')
-a1.intentions.push(BlackboxIntentionGenerator([PickUp, PutDown, Stack, UnStack])) // always applicable
+let {PlanningIntention} = require('../pddl/Blackbox')([PickUp, PutDown, Stack, UnStack])
+a1.intentions.push(PlanningIntention)
 console.log('a1 entries', a1.beliefs.entries)
 console.log('a1 literals', a1.beliefs.literals)
 a1.postSubGoal( new PlanningGoal( { goal: ['holding a'] } ) )

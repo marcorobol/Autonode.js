@@ -1,7 +1,9 @@
 const Beliefset =  require('./Beliefset')
 const Intention = require('./Intention');
+const chalk = require('chalk');
 
-
+var nextId = 0
+const colors = ['red', 'blue', 'green', 'yellow', 'magenta', 'cyan', 'redBright', 'greenBright', 'yellowBright', 'blueBright', 'magentaBright', 'cyanBright', 'whiteBright']
 
 /**
  * @class Agent
@@ -10,6 +12,7 @@ class Agent {
 
     constructor (name) {
         this.name = name
+        this.id = nextId++
 
         /** @type {Beliefset} beliefs */
         this.beliefs = new Beliefset()
@@ -20,9 +23,29 @@ class Agent {
         this.intentions = []
     }
 
-    log (...args) {
-        console.log( this.name + '\t\t', ...args )
+
+
+    headerError (header = '', ...args) {
+        header += ' '.repeat(Math.max(30-header.length,0))
+        console.error(chalk.bold.italic[colors[this.id%colors.length]](header, ...args))
     }
+
+    error (...args) {
+        this.headerError(this.name, ...args)
+    }
+
+
+
+    headerLog (header = '', ...args) {
+        header += ' '.repeat(Math.max(30-header.length,0))
+        console.log(chalk[colors[this.id%colors.length]](header, ...args))
+    }
+
+    log (...args) {
+        this.headerLog(this.name, ...args)
+    }
+
+
 
     async postSubGoal (subGoal) {
         
@@ -42,14 +65,16 @@ class Agent {
     
             var intention = new intentionClass(this, subGoal)
             
-            var success = await intention.run().catch( err => {} )
+            var success = await intention.run().catch( err => {
+                this.error('Failed to use intention', intentionClass.name, 'to achieve goal', subGoal.toString() + ':', err.message || err || 'undefined error')
+                this.error( err.stack || err || 'undefined error');
+            } )
     
             if ( success ) {
                 this.log('Succesfully used intention', intentionClass.name, 'to achieve goal', subGoal.toString())
                 return Promise.resolve(true) // same as: return true;
             }
             else {
-                this.log('Failed to use intention', intentionClass.name, 'to achieve goal', subGoal.toString())
                 continue // retrying
             }
 
