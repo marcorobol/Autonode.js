@@ -1,8 +1,9 @@
 const pddlActionIntention = require('../pddl/actions/pddlActionIntention')
 const Agent = require('../bdi/Agent')
 const Intention = require('../bdi/Intention')
-const BlackboxGoal = require('../pddl/BlackboxGoal')
-const BlackboxIntentionGenerator = require('../pddl/BlackboxIntentionGenerator')
+const PlanningGoal = require('../pddl/PlanningGoal')
+// const BlackboxIntentionGenerator = require('../pddl/BlackboxIntentionGenerator')
+const PlannerIntentionGenerator = require('../pddl/OnlinePlanner')
 
 
 
@@ -56,11 +57,11 @@ class UnStack extends pddlActionIntention {
 
 class ReplanningIntention extends Intention {
     static applicable (goal) {
-        return goal instanceof BlackboxGoal
+        return goal instanceof PlanningGoal
     }
     *exec (parameters) {
         yield new Promise(res=>setTimeout(res,1100))
-        yield this.agent.postSubGoal( new BlackboxGoal(parameters) )
+        yield this.agent.postSubGoal( new PlanningGoal(parameters) )
     }
 }
 
@@ -73,11 +74,11 @@ class ReplanningIntention extends Intention {
     // a1.beliefs.declare('clear b')
     // a1.beliefs.declare('empty')
     world.beliefs.observeAny( (value,key,observable)=>{value?a1.beliefs.declare(key):a1.beliefs.undeclare(key)} )
-    a1.intentions.push(BlackboxIntentionGenerator([PickUp, PutDown, Stack, UnStack]))
+    a1.intentions.push(PlannerIntentionGenerator([PickUp, PutDown, Stack, UnStack]))
     a1.intentions.push(ReplanningIntention)
     // console.log('a1 entries', a1.beliefs.entries)
     // console.log('a1 literals', a1.beliefs.literals)
-    a1.postSubGoal( new BlackboxGoal( { goal: ['holding a'] } ) ) // by default give up after trying all intention to achieve the goal
+    a1.postSubGoal( new PlanningGoal( { goal: ['holding a'] } ) ) // by default give up after trying all intention to achieve the goal
 }
 {
     let a2 = new Agent('a2')
@@ -86,11 +87,11 @@ class ReplanningIntention extends Intention {
     // a2.beliefs.declare('clear b')
     // a2.beliefs.declare('empty')
     world.beliefs.observeAny( (value,key,observable)=>{value?a2.beliefs.declare(key):a2.beliefs.undeclare(key)} )
-    a2.intentions.push(BlackboxIntentionGenerator([PickUp, PutDown, Stack, UnStack]))
+    a2.intentions.push(PlannerIntentionGenerator([PickUp, PutDown, Stack, UnStack]))
     a2.intentions.push(ReplanningIntention)
     // console.log('a2 entries', a2.beliefs.entries)
     // console.log('a2 literals', a2.beliefs.literals)
-    a2.postSubGoal( new BlackboxGoal( { goal: ['holding a'] } ) ) // loop over intentions trying to achieve the goals up to 5 times
+    a2.postSubGoal( new PlanningGoal( { goal: ['holding a'] } ) ) // loop over intentions trying to achieve the goals up to 5 times
 }
 
 

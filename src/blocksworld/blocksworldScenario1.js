@@ -1,7 +1,7 @@
 const {PickUp, PutDown, Stack, UnStack} = require('./blocksworldIntention')
 const Intention = require('../bdi/Intention')
 const Agent = require('../bdi/Agent')
-const BlackboxGoal = require('../pddl/BlackboxGoal')
+const PlanningGoal = require('../pddl/PlanningGoal')
 const BlackboxIntentionGenerator = require('../pddl/BlackboxIntentionGenerator')
 
 
@@ -36,7 +36,7 @@ a1.beliefs.declare('empty')
 a1.intentions.push(BlackboxIntentionGenerator([PickUp, PutDown, Stack, UnStack])) // always applicable
 console.log('a1 entries', a1.beliefs.entries)
 console.log('a1 literals', a1.beliefs.literals)
-a1.postSubGoal( new BlackboxGoal( { goal: ['holding a'] } ) )
+a1.postSubGoal( new PlanningGoal( { goal: ['holding a'] } ) )
 
 
 

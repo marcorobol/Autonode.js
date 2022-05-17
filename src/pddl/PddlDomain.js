@@ -63,21 +63,11 @@ class PddlDomain {
 
     saveToFile () {
 
-        const content = `\
-;; domain file: domain-${this.name}.pddl
-(define (domain ${this.name})
-    (:requirements :strips)
-    (:predicates
-        ${this.predicates.map( p => p.toPddlString()).join('\n\t\t')}              
-    )
-    ${this.actions.map( a => a.toPddlString()).join('\n\t\t') }
-)`
-
         var path = './tmp/domain-'+this.name+'.pddl'
         
         return new Promise( (res, rej) => {
 
-            fs.writeFile(path, content, err => {
+            fs.writeFile(path, this.content, err => {
                 if (err)
                     rej(err)
                 else // console.log("File written successfully");
@@ -86,6 +76,18 @@ class PddlDomain {
 
         })
 
+    }
+
+    get content() {
+        return `\
+;; domain file: domain-${this.name}.pddl
+(define (domain ${this.name})
+    (:requirements :strips)
+    (:predicates
+        ${this.predicates.map( p => p.toPddlString()).join('\n\t\t')}              
+    )
+    ${this.actions.map( a => a.toPddlString()).join('\n\t\t') }
+)`
     }
 
 }

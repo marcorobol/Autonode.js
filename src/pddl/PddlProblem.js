@@ -36,21 +36,11 @@ class PddlProblem {
     }
 
     saveToFile () {
-
-        const content = `\
-;; problem file: problem-${this.name}.pddl
-(define (problem ${this.name})
-    (:domain ${this.name})
-    (:objects ${this.objects.toPddlString()})
-	(:init ${this.inits.toPddlString()})
-	(:goal ${this.goals.toPddlString()})
-)
-`
         var path = './tmp/problem-'+this.name+'.pddl'
         
         return new Promise( (res, rej) => {
 
-            fs.writeFile(path, content, err => {
+            fs.writeFile(path, this.content, err => {
                 if (err)
                     rej(err)
                 else // console.log("File written successfully");
@@ -59,6 +49,18 @@ class PddlProblem {
 
         })
 
+    }
+
+    get content() {
+        return `\
+;; problem file: problem-${this.name}.pddl
+(define (problem ${this.name})
+    (:domain ${this.name})
+    (:objects ${this.objects.toPddlString()})
+	(:init ${this.inits.toPddlString()})
+	(:goal ${this.goals.toPddlString()})
+)
+`
     }
 
 }
