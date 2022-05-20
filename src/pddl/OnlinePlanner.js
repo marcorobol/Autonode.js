@@ -93,7 +93,7 @@ function setup (intentions = []) {
 
             var pddlProblem = new PddlProblem(this.agent.name)
             pddlProblem.addObject(...this.agent.beliefs.objects) //'a', 'b'
-            pddlProblem.addInit(...this.agent.beliefs.literals)
+            pddlProblem.addInit(...this.agent.beliefs.entries.filter( ([fact,value])=>value ).map( ([fact,value])=>fact ))//(...this.agent.beliefs.literals)
             pddlProblem.addGoal(...this.goal.parameters.goal)
             var problemFile = yield pddlProblem.saveToFile()
 
