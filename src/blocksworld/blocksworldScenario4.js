@@ -40,7 +40,7 @@ const world = new Agent('world');
         async checkPreconditionAndApplyEffect () {
             if ( this.checkPrecondition() ) {
                 this.applyEffect()
-                await new Promise(res=>setTimeout(res,1000))
+                await new Promise(res=>setTimeout(res,5000))
             }
             else
                 throw new Error('pddl precondition not valid'); //Promise is rejected!
@@ -72,8 +72,9 @@ const world = new Agent('world');
         static effect = [ ['holding', 'x', 'gripper'], ['not empty', 'gripper'], ['not clear', 'x'], ['clear', 'y'], ['not on', 'x', 'y'] ]
     }
 
-    world.pickUp = function ({ob, gripper} = args) {
+    world.pickUp = async function ({ob, gripper} = args) {
         this.log('pickUp', ob, gripper)
+        // await new Promise( res => setTimeout(res, 5000) )
         return new PickUp(world, {ob, gripper} ).checkPreconditionAndApplyEffect()
         .catch(err=>{this.error('world.pickUp failed:', err.message || err); throw err;})
     }
@@ -90,8 +91,10 @@ const world = new Agent('world');
         .catch(err=>{this.error('world.stack failed:', err.message || err); throw err;})
     }
 
-    world.unStack = function ({x, y, gripper} = args) {
+    world.unStack = async function ({x, y, gripper} = args) {
         this.log('unStack', x, y, gripper)
+        new UnStack(world, {x, y, gripper} ).checkPrecondition()
+        // await new Promise( res => setTimeout(res, 5000) )
         return new UnStack(world, {x, y, gripper} ).checkPreconditionAndApplyEffect()
         .catch(err=>{this.error('world.unStack failed:', err.message || err); throw err;})
     }
@@ -220,8 +223,10 @@ class PostmanAcceptAllRequest extends Intention {
         *exec ({x,y,gripper}=parameters) {
             if (gripper==this.agent.name)
                 yield world.unStack({x,y,gripper})
-            else
-                yield MessageDispatcher.authenticate(this.agent).sendTo( gripper, new UnStackGoal({x,y,gripper}) )
+            else {
+                let request = yield new UnStackGoal({x,y,gripper})
+                yield MessageDispatcher.authenticate(this.agent).sendTo( gripper, request )
+            }
         }
     }
 

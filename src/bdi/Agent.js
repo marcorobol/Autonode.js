@@ -72,6 +72,7 @@ class Agent {
     
             if ( success ) {
                 this.log('Succesfully used intention', intentionClass.name, 'to achieve goal', subGoal.toString())
+                subGoal.achieved = true;
                 return Promise.resolve(true) // same as: return true;
             }
             else {
