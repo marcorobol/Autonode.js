@@ -63,8 +63,10 @@ class pddlActionIntention extends Intention {
             let possibly_negated_predicate = literal[0]
             let vars = literal.slice(1)
             let grounded = possibly_negated_predicate
-            for (let v of vars)
-                grounded = grounded + ' ' + parametersMap[v]
+            for (let v of vars) {
+                grounded += " ";
+                grounded += parametersMap[v] ? parametersMap[v] : v;
+            }
             return grounded
         })
     }

@@ -10,12 +10,12 @@ class PddlDomain {
         this.actions = actions
     }
 
-    addPredicate (predicate) { // predicate = ['light-on', 'l']
+    addPredicate (predicate, parameters = []) { // predicate = ['light-on', 'l']
         if ( this.predicates.find( (e) => e[0]==predicate[0]) )
             return false
         this.predicates.push(predicate)
         predicate.toPddlString = function () {
-            return '('+predicate[0]+' ' + predicate.slice(1).map( v => '?'+v ).join(' ') + ')'
+            return '('+predicate[0]+' ' + predicate.slice(1).map( v => (parameters.includes(v) ? "?" + v : v)).join(' ') + ')'
         }
         return predicate
     }
@@ -29,14 +29,14 @@ class PddlDomain {
                 let not = p[0].split(' ')[0]=='not'
                 let predicate = (not ? p[0].split(' ')[1] : p[0])
                 let args = p.slice(1)
-                this.addPredicate([predicate, ...args])
+                this.addPredicate([predicate, ...args], parameters)
             }
 
             for ( let p of effect ) {
                 let not = p[0].split(' ')[0]=='not'
                 let predicate = (not ? p[0].split(' ')[1] : p[0])
                 let args = p.slice(1)
-                this.addPredicate([predicate, ...args])
+                this.addPredicate([predicate, ...args], parameters)
             }
 
             this.actions.push(actionClass)
@@ -45,10 +45,10 @@ class PddlDomain {
         (:action ${actionClass.name}
             :parameters (${parameters.map( p => '?'+p ).join(' ')})
             :precondition (and
-            ${PddlDomain.mapTokens(precondition)}
+            ${PddlDomain.mapTokens(precondition, parameters)}
             )
             :effect (and
-            ${PddlDomain.mapTokens(effect)}
+            ${PddlDomain.mapTokens(effect, parameters)}
             )
         )`
             }
@@ -56,11 +56,11 @@ class PddlDomain {
         }
     }
 
-    static mapTokens(tokens) {
+    static mapTokens(tokens, parameters = []) {
         return tokens.map( p => {
             let not = p[0].split(' ')[0]=='not'
             let predicate = (not ? p[0].split(' ')[1] : p[0])
-            let args = p.slice(1).map( v => '?'+v ).join(' ')
+            let args = p.slice(1).map( v => (parameters.includes(v) ? "?" + v : v)).join(' ')
             if (not)
                 return `${padding}(not (${predicate} ${args}))`
             return `${padding}(${predicate} ${args})`
