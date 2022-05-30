@@ -88,7 +88,7 @@ class PddlDomain {
         return `\
 ;; domain file: domain-${this.name}.pddl
 (define (domain ${this.name})
-    (:requirements :strips)
+    (:requirements :strips :negative-preconditions)
     (:predicates
         ${this.predicates.map( p => p.toPddlString()).join('\n' + padding.repeat(2))}              
     )
